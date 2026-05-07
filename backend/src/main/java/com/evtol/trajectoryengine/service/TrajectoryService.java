@@ -5,12 +5,13 @@ import com.evtol.trajectoryengine.domain.TrajectoryModel;
 import com.evtol.trajectoryengine.domain.TrajectoryPoint;
 import com.evtol.trajectoryengine.domain.Waypoint;
 import com.evtol.trajectoryengine.dto.TrajectoryResponse;
-
+//import com.evtol.trajectoryengine.spline.CubicSplineBuilder;
 import com.evtol.trajectoryengine.bspline.BSplineCurveBuilder;
 import com.evtol.trajectoryengine.validation.WaypointValidator;
 import com.evtol.trajectoryengine.fitting.LeastSquaresFitter;
 import com.evtol.trajectoryengine.domain.Obstacle;
 import com.evtol.trajectoryengine.planning.RrtStarPlanner;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -32,11 +33,14 @@ public class TrajectoryService {
     private final LeastSquaresFitter leastSquaresFitter;
     private final RrtStarPlanner rrtStarPlanner;
 
+    private final JsonLogService jsonLogService;
+
     @Value("${trajectory.sampling.interval}")
     private double samplingInterval;
 
     @Value("${trajectory.algorithm}")
     private String algorithm;
+
 
     public TrajectoryResponse generateTrajectory(double lambda) {
 
@@ -50,23 +54,27 @@ public class TrajectoryService {
         List<Waypoint> controlPoints = leastSquaresFitter.fit(waypoints);
 
         // 4. Build trajectory
-        TrajectoryModel trajectoryModel = bSplineCurveBuilder.build(controlPoints, lambda);
+        TrajectoryModel trajectoryModel;
 
-        if ("bspline".equalsIgnoreCase(algorithm)) {
+        
             trajectoryModel = bSplineCurveBuilder.build(controlPoints, lambda);
-        }
+       
 
         // 5. Sample
         List<TrajectoryPoint> points =
                 samplingService.sample(trajectoryModel, samplingInterval);
 
         // 6. Response
-        return new TrajectoryResponse(
+        TrajectoryResponse response = new TrajectoryResponse(
                 points,
                 waypoints,
                 controlPoints,
                 trajectoryModel.getTotalDuration()
         );
+
+        jsonLogService.saveResponse(response);
+
+        return response;
     }
 
     public TrajectoryResponse generateTrajectory(double lambda, List<Obstacle> obstacles) {
@@ -82,23 +90,27 @@ public class TrajectoryService {
         List<Waypoint> controlPoints = leastSquaresFitter.fit(waypoints);
 
         // 4. Build trajectory
-        TrajectoryModel trajectoryModel = bSplineCurveBuilder.build(controlPoints, lambda);
+        TrajectoryModel trajectoryModel;
 
-        if ("bspline".equalsIgnoreCase(algorithm)) {
+       
             trajectoryModel = bSplineCurveBuilder.build(controlPoints, lambda);
-        }
+       
 
         // 5. Sample
         List<TrajectoryPoint> points =
                 samplingService.sample(trajectoryModel, samplingInterval);
 
         // 6. Response
-        return new TrajectoryResponse(
+        TrajectoryResponse response = new TrajectoryResponse(
                 points,
                 waypoints,
                 controlPoints,
                 trajectoryModel.getTotalDuration()
         );
+
+        jsonLogService.saveResponse(response);
+
+        return response;
     }
 
     private List<Waypoint> applyObstacleAvoidance(List<Waypoint> sourceWaypoints, List<Obstacle> obstacles) {
@@ -109,3 +121,4 @@ public class TrajectoryService {
         return rrtStarPlanner.plan(sourceWaypoints, obstacles);
     }
 }
+ 
