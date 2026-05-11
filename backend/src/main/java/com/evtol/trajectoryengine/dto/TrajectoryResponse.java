@@ -1,5 +1,6 @@
 package com.evtol.trajectoryengine.dto;
 
+import com.evtol.trajectoryengine.domain.Obstacle;
 import com.evtol.trajectoryengine.domain.TrajectoryPoint;
 import com.evtol.trajectoryengine.domain.Waypoint;
 import lombok.AllArgsConstructor;
@@ -20,4 +21,5 @@ public class TrajectoryResponse {
     private List <Waypoint> waypoints;
     private List<Waypoint> controlPoints;
     private double totalDuration;
+    private List<Obstacle> obstacles;
 }

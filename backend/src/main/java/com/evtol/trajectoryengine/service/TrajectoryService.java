@@ -32,6 +32,7 @@ public class TrajectoryService {
     private final SamplingService samplingService;
     private final LeastSquaresFitter leastSquaresFitter;
     private final RrtStarPlanner rrtStarPlanner;
+    private List<Obstacle> obstacles;
 
     private final JsonLogService jsonLogService;
 
@@ -69,7 +70,8 @@ public class TrajectoryService {
                 points,
                 waypoints,
                 controlPoints,
-                trajectoryModel.getTotalDuration()
+                trajectoryModel.getTotalDuration(),
+                obstacles
         );
 
         jsonLogService.saveResponse(response);
@@ -82,6 +84,7 @@ public class TrajectoryService {
         // 1. Load waypoints
         List<Waypoint> rawWaypoints = dataProvider.loadWaypoints();
         List<Waypoint> waypoints = applyObstacleAvoidance(rawWaypoints, obstacles);
+        this.obstacles = obstacles;
 
         // 2. Validate
         validator.validate(waypoints);
@@ -105,7 +108,9 @@ public class TrajectoryService {
                 points,
                 waypoints,
                 controlPoints,
-                trajectoryModel.getTotalDuration()
+                trajectoryModel.getTotalDuration(),
+                obstacles
+
         );
 
         jsonLogService.saveResponse(response);
