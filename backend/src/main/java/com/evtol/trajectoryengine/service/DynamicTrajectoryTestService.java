@@ -12,7 +12,9 @@ import com.evtol.trajectoryengine.dto.TrajectoryResponse;
 import com.evtol.trajectoryengine.fitting.LeastSquaresFitter;
 import com.evtol.trajectoryengine.planning.DynamicRrtStarPlanner;
 import com.evtol.trajectoryengine.validation.WaypointValidator;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +48,11 @@ public class DynamicTrajectoryTestService {
 
     private final DynamicRrtStarPlanner dynamicRrtStarPlanner;
 
+    /*
+     * JSON log service
+     */
+    private final JsonLogService jsonLogService;
+
     @Value("${trajectory.sampling.interval}")
     private double samplingInterval;
 
@@ -63,12 +70,14 @@ public class DynamicTrajectoryTestService {
         /*
          * 1. Load original waypoints
          */
-        List<Waypoint> rawWaypoints = dataProvider.loadWaypoints();
+        List<Waypoint> rawWaypoints =
+                dataProvider.loadWaypoints();
 
         /*
          * 2. Load dynamic obstacle dataset
          */
-        List<DynamicObstacle> dynamicObstacles = dynamicObstacleDataProvider.loadDynamicObstacles();
+        List<DynamicObstacle> dynamicObstacles =
+                dynamicObstacleDataProvider.loadDynamicObstacles();
 
         System.out.println(
                 "Loaded Dynamic Obstacles: "
@@ -134,15 +143,29 @@ public class DynamicTrajectoryTestService {
         );
 
         /*
-         * 9. Return response
+         * 9. Build response
          */
-        return new TrajectoryResponse(
-                points,
-                avoidedWaypoints,
-                controlPoints,
-                trajectoryModel.getTotalDuration(),
-                staticObstacles
+        TrajectoryResponse response =
+                new TrajectoryResponse(
+                        points,
+                        avoidedWaypoints,
+                        controlPoints,
+                        trajectoryModel.getTotalDuration(),
+                        staticObstacles
+                );
+
+        /*
+         * 10. Save JSON log
+         */
+        jsonLogService.saveResponse(
+                response,
+                "dynamic_test"
         );
+
+        /*
+         * 11. Return response
+         */
+        return response;
     }
 
     /*
