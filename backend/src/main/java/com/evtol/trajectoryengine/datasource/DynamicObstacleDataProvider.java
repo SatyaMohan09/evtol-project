@@ -23,7 +23,7 @@ public class DynamicObstacleDataProvider {
         try (
                 BufferedReader reader =
                         new BufferedReader(
-                                new FileReader("C:\\Users\\satya\\Desktop\\evtol_project\\data-generation\\dynamic-obstacles\\single_dynamic 1.csv")
+                                new FileReader("C:\\Users\\satya\\Desktop\\evtol_project\\data-generation\\dynamic-obstacles\\crossing_dynamic_obstacles 1.csv")
                         )
         ) {
 
