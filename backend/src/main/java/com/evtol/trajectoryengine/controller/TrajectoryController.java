@@ -1,17 +1,17 @@
 package com.evtol.trajectoryengine.controller;
 
-import com.evtol.trajectoryengine.dto.TrajectoryResponse;
-import com.evtol.trajectoryengine.dto.TrajectoryRequest;
+import com.evtol.trajectoryengine.datasource.CsvObstacleDataProvider;
 import com.evtol.trajectoryengine.domain.Obstacle;
-import com.evtol.trajectoryengine.service.TrajectoryService;
+import com.evtol.trajectoryengine.dto.TrajectoryRequest;
+import com.evtol.trajectoryengine.dto.TrajectoryResponse;
 import com.evtol.trajectoryengine.service.DynamicTrajectoryTestService;
-//import com.evtol.trajectoryengine.service.SamplingService;
+import com.evtol.trajectoryengine.service.TrajectoryService;
 
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
-
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -23,38 +23,70 @@ public class TrajectoryController {
 
     private final DynamicTrajectoryTestService dynamicTrajectoryTestService;
 
-    //private final SamplingService samplingService;
+    private final CsvObstacleDataProvider obstacleDataProvider;
 
+    /*
+     * GET trajectory
+     */
     @GetMapping("/trajectory")
     public TrajectoryResponse getTrajectory(
-            @RequestParam(defaultValue = "0.1") double lambda) {
+            @RequestParam(defaultValue = "0.1") double lambda
+    ) {
 
         return trajectoryService.generateTrajectory(lambda);
     }
 
+    /*
+     * POST trajectory
+     */
     @PostMapping("/trajectory")
     public TrajectoryResponse createTrajectory(
-            @RequestBody(required = false) TrajectoryRequest request) {
+            @RequestBody(required = false)
+            TrajectoryRequest request
+    ) {
 
-        double lambda = request != null && request.getLambda() != null
-                ? request.getLambda()
-                : 0.1;
+        double lambda =
+                request != null
+                        && request.getLambda() != null
+                        ? request.getLambda()
+                        : 0.1;
 
-        List<Obstacle> obstacles = request != null && request.getObstacles() != null
-                ? request.getObstacles()
-                : List.of();
+        List<Obstacle> obstacles =
+                request != null
+                        && request.getObstacles() != null
+                        ? request.getObstacles()
+                        : List.of();
 
-        return trajectoryService.generateTrajectory(lambda, obstacles);
+        return trajectoryService.generateTrajectory(
+                lambda,
+                obstacles
+        );
     }
 
+    /*
+     * Static obstacles endpoint
+     *
+     * Frontend should now call:
+     * http://localhost:8080/api/obstacles
+     */
+    @GetMapping("/obstacles")
+    public List<Obstacle> getObstacles() {
+
+        return obstacleDataProvider.loadObstacles();
+    }
+
+    /*
+     * Dynamic obstacle testing endpoint
+     */
     @GetMapping("/dynamic-test")
-        public TrajectoryResponse generateDynamicTestTrajectory(
-                @RequestParam(defaultValue = "0.5") double lambda
-        ) {
+    public TrajectoryResponse generateDynamicTestTrajectory(
+            @RequestParam(defaultValue = "0.5")
+            double lambda
+    ) {
 
         /*
-        * Temporary static obstacles
-        */
+         * Temporary static obstacles
+         */
         List<Obstacle> staticObstacles = List.of(
 
                 new Obstacle(
@@ -77,5 +109,5 @@ public class TrajectoryController {
                         lambda,
                         staticObstacles
                 );
-        }
+    }
 }

@@ -349,25 +349,57 @@ useEffect(() => {
         return true;
       }
 
+
+
+
+
+
+
+
+
+
       async function loadObstacles() {
-        try {
-          const response = await fetch('/data/obstacles.csv');
-          const csvText = await response.text();
-          const lines = csvText.trim().split('\n');
-          const obstacles = [];
-          
-          for (let i = 1; i < lines.length; i++) { // Skip header
-            const [x, y, z, radius] = lines[i].split(',').map(Number);
-            obstacles.push({ x, y, z, radius });
-          }
-          
-          obstacleBuildingsRef.current = obstacles;
-          console.log("Obstacles loaded:", obstacles.length);
-        } catch (err) {
-          console.error("Failed to load obstacles:", err);
-          obstacleBuildingsRef.current = [];
-        }
-      }
+  try {
+
+    const response = await fetch(
+      'http://localhost:8080/api/obstacles'
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch obstacles');
+    }
+
+    const obstacles = await response.json();
+
+    obstacleBuildingsRef.current = obstacles;
+
+    console.log(
+      "Obstacles loaded:",
+      obstacles.length
+    );
+
+  } catch (err) {
+
+    console.error(
+      "Failed to load obstacles:",
+      err
+    );
+
+    obstacleBuildingsRef.current = [];
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
       async function loadTrajectory() {
   try {
