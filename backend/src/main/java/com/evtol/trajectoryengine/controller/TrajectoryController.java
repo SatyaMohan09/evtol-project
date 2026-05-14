@@ -1,6 +1,7 @@
 package com.evtol.trajectoryengine.controller;
 
 import com.evtol.trajectoryengine.datasource.CsvObstacleDataProvider;
+//import com.evtol.trajectoryengine.datasource.DynamicObstacleDataProvider;
 import com.evtol.trajectoryengine.domain.Obstacle;
 import com.evtol.trajectoryengine.dto.TrajectoryRequest;
 import com.evtol.trajectoryengine.dto.TrajectoryResponse;
@@ -24,6 +25,8 @@ public class TrajectoryController {
     private final DynamicTrajectoryTestService dynamicTrajectoryTestService;
 
     private final CsvObstacleDataProvider obstacleDataProvider;
+
+    //private final DynamicObstacleDataProvider dynamicObstacleDataProvider;
 
     /*
      * GET trajectory
@@ -79,35 +82,21 @@ public class TrajectoryController {
      * Dynamic obstacle testing endpoint
      */
     @GetMapping("/dynamic-test")
-    public TrajectoryResponse generateDynamicTestTrajectory(
-            @RequestParam(defaultValue = "0.5")
-            double lambda
-    ) {
+        public TrajectoryResponse generateDynamicTestTrajectory(
+                @RequestParam(defaultValue = "0.5")
+                double lambda
+        ) {
 
         /*
-         * Temporary static obstacles
-         */
-        List<Obstacle> staticObstacles = List.of(
-
-                new Obstacle(
-                        2500,
-                        0,
-                        1200,
-                        180
-                ),
-
-                new Obstacle(
-                        4200,
-                        0,
-                        2100,
-                        220
-                )
-        );
+        * Load static obstacles from CSV
+        */
+        List<Obstacle> staticObstacles =
+                obstacleDataProvider.loadObstacles();
 
         return dynamicTrajectoryTestService
                 .generateDynamicTrajectory(
                         lambda,
                         staticObstacles
                 );
-    }
+        }
 }
