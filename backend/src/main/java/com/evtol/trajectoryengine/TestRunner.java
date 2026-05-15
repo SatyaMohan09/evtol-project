@@ -5,7 +5,7 @@ import com.evtol.trajectoryengine.domain.TrajectoryPoint;
 import com.evtol.trajectoryengine.service.TrajectoryService;
 
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
+//import org.springframework.stereotype.Component;
 
 //@Component
 public class TestRunner implements CommandLineRunner {
